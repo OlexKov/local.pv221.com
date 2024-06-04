@@ -1,0 +1,11 @@
+.main-form{
+   box-shadow: 5px 5px 5px rgba(0,0,0,0.2);
+
+}
+
+.form-buttons >  button,
+.form-buttons >  a,
+ input
+{
+    box-shadow: 3px 3px 3px rgba(0,0,0,0.2);
+}
