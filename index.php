@@ -1,5 +1,4 @@
 <?php
-
 // Database credentials
 $uploaddir = 'images/';
 $host = 'localhost';
@@ -43,7 +42,6 @@ if(isset($_POST["delete"]))
     $phone = $_POST['phone'];
     $sql = "INSERT INTO tbl_users (name, image, email,phone) 
             VALUES ('$name','$base_url$uploadfile','$email','$phone')";
-
     $pdo->query($sql);
 }
 if(isset($_POST["delete"]) || isset($_POST["create"])){
