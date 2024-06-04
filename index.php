@@ -26,9 +26,7 @@ if(isset($_POST["delete"]))
     $sql = "DELETE FROM tbl_users WHERE id = $id";
     $pdo->query($sql);
     $path = parse_url($image, PHP_URL_PATH);
-    echo $path ;
-    unlink($uploaddir.basename($path));
-
+     unlink($uploaddir.basename($path));
 }else if(isset($_POST["create"]))
 {
     $protocol = isset($_SERVER['HTTPS']) &&
