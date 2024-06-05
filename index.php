@@ -5,8 +5,9 @@ if(isset($_POST["delete"]))
 {
     $id = $_POST["id"];
     $image = $_POST["image"];
-    $sql = "DELETE FROM tbl_users WHERE id = $id";
-    $pdo->query($sql);
+    $sql = "DELETE FROM tbl_users WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['id'=>$id]);
     unlink(UPLOADDIR."/".$image);
     $success = "true";
     header( 'Location: /?success='.$success);
