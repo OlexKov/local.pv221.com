@@ -1,7 +1,7 @@
 <?php
 include_once ("conection_database.php");
 
-if(isset($_POST["delete"]))
+if($_SERVER["REQUEST_METHOD"]=="POST")
 {
     $id = $_POST["id"];
     $image = $_POST["image"];
