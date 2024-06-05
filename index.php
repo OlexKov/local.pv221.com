@@ -1,23 +1,5 @@
 <?php
-// Database credentials
-$uploaddir = 'images/';
-$host = 'localhost';
-$dbname = 'local.pv221.com';
-$username = 'root';
-$password = '';
-
-// Connection string
-$dsn = "mysql:host=$host;dbname=$dbname";
-
-// Attempt to connect
-try {
-    $pdo = new PDO($dsn, $username, $password);
-    // Set PDO to throw exceptions on errors
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-   // echo "Connected successfully";
-} catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
-}
+include_once ("conection_database.php");
 
 if(isset($_POST["delete"]))
 {
@@ -25,26 +7,9 @@ if(isset($_POST["delete"]))
     $image = $_POST["image"];
     $sql = "DELETE FROM tbl_users WHERE id = $id";
     $pdo->query($sql);
-    $path = parse_url($image, PHP_URL_PATH);
-     unlink($uploaddir.basename($path));
-}else if(isset($_POST["create"]))
-{
-    $protocol = isset($_SERVER['HTTPS']) &&
-    $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
-    $base_url = $protocol . $_SERVER['HTTP_HOST'] . '/';
-    $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-    $uploadfile = $uploaddir . uniqid() . '.' .$ext;
-    move_uploaded_file($_FILES['image']['tmp_name'], $uploadfile);
-    $name =  $_POST['name'];
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
-    $sql = "INSERT INTO tbl_users (name, image, email,phone) 
-            VALUES ('$name','$base_url$uploadfile','$email','$phone')";
-    $pdo->query($sql);
-}
-if(isset($_POST["delete"]) || isset($_POST["create"])){
+    unlink(UPLOADDIR."/".$image);
     $success = "true";
-    header( 'Location: http://local.pv221.com/index.php?success='.$success);
+    header( 'Location: /?success='.$success);
 }
 ?>
 
@@ -86,14 +51,15 @@ if(isset($_POST["delete"]) || isset($_POST["create"])){
             foreach ($pdo->query($sql) as $row) {
                 $id = $row['id'];
                 $name = $row['name'];
-                $image = $row['image'];
+                $image =  $row['image'];
+                $image_path =  UPLOADDIR ."/".$image;
                 $email = $row['email'];
                 $phone = $row['phone'];
                 echo "
             <tr class='align-middle'>
                 <th scope='row'>$id</th>
                 <td>
-                    <img src='$image'
+                    <img src='$image_path'
                          width='100'
                          alt='$name'>
                 </td>
@@ -101,12 +67,12 @@ if(isset($_POST["delete"]) || isset($_POST["create"])){
                 <td>$phone</td>
                 <td>$email</td>
                 <td>
-                <form action = 'index.php' method = 'POST'>
-                <input name = 'id' type = 'hidden' value = '$id'>
-                <input name = 'image' type = 'hidden' value = '$image'>
-                  <button class='btn btn-danger' name='delete' type = 'submit'>
+                <form  method = 'POST'>
+                  <input name = 'id' type = 'hidden' value = '$id'>
+                  <input name = 'image' type = 'hidden' value = '$image'>
+                    <button class='btn btn-danger' name='delete' type = 'submit'>
                        <i class='bi-trash' style='font-size: 2rem;  '></i>
-                  </button>  
+                    </button>  
                 </form>
                 
             </tr>
