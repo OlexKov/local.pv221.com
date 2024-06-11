@@ -10,7 +10,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
     $fileName = uniqid() . '.' .$ext;
     $uploadfile = $folderName ."/". $fileName;
     move_uploaded_file($_FILES['image']['tmp_name'], $uploadfile);
-    $name =  $_POST['name'];
+    $name = $_POST['name'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
     $sql = 'INSERT INTO tbl_users (name, email, phone, image) VALUES (:name, :email, :phone, :image)';
@@ -37,30 +37,44 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
 <body>
 <div class="container w-50 mt-5">
     <h1> Новий користувач</h1>
-    <form class="mt-5 p-4 border border-1 d-flex flex-column rounded-3 gap-3 main-form"  method = "POST" enctype="multipart/form-data">
-        <div >
-            <label for="name" class="form-label">Ім'я та прізвище</label>
-            <input type="text" class="form-control" id="name" name = "name" required>
-        </div>
-        <div>
-            <label for="email" class="form-label">Електронна пошта</label>
-            <input type="email" class="form-control" id="email" name = "email" required>
-        </div>
-        <div>
-            <label for="phone" class="form-label">Телефон</label>
-            <input type="text" class="form-control" id="phone" name = "phone" required>
-        </div>
-        < <div class="mt-4">
-            <div class="row d-flex align-items-center">
-                <div class="col-md-3">
-                    <label for="image" class="form-label">
-                        <img src="/images/no-photo.png" alt="фото" width="100%">
-                    </label>
+    <form class="mt-5 p-4 border border-1 d-flex flex-column rounded-3 gap-3 main-form needs-validation"  method = "POST" enctype="multipart/form-data" novalidate>
+        <div class="d-flex gap-3" >
+            <div class="d-flex flex-column flex-fill w-25">
+                <label id="image-label" for="image" class="form-label">
+                    <img class="img-thumbnail rounded w-100"  id="photo" src="/images/no-photo.png" alt="фото"  >
+                    <button onclick="removeImage()" id="image-remove"  class='btn btn-link' type="button">
+                        <i class='bi bi-x-circle-fill' style='font-size: 1.1rem; '></i>
+                    </button>
+                </label>
+                <input style="display: none" type="file" class="form-control" id="image" name="image" onchange="changeImage(this)"  accept="image/png, image/gif, image/jpeg" required>
+                <div class="invalid-feedback">
+                    Оберіть фото
                 </div>
-                <div class="mb-3 col-md-9">
-                    <input type="file" class="form-control" id="image" name="image"  required>
+           </div>
+            <div class="flex-fill">
+                <div >
+                    <label for="name" class="form-label">Ім'я та прізвище</label>
+                    <input type="text" class="form-control" id="name" name = "name" required>
+                    <div class="invalid-feedback">
+                        Введіть ім'я та прізвище
+                    </div>
+                </div>
+                <div>
+                    <label for="email" class="form-label">Електронна пошта</label>
+                    <input type="email" class="form-control" id="email" name = "email" required>
+                    <div class="invalid-feedback">
+                        Введіть електронну пошту
+                    </div>
+                </div>
+                <div>
+                    <label for="phone" class="form-label">Телефон</label>
+                    <input type="text" class="form-control" id="phone" name = "phone" required>
+                    <div class="invalid-feedback">
+                        Введіть тедефон
+                    </div>
                 </div>
             </div>
+
         </div>
         <div class="d-flex gap-3 mt-3 form-buttons">
             <a class='btn btn-outline-dark w-50' href="index.php">Повернутися</a>
@@ -70,3 +84,36 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
 </div>
 </body>
 </html>
+
+<script type="text/javascript">
+     (() => {
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+
+    function changeImage(data){
+       if (FileReader && data != null && data.files && data.files.length) {
+            const fr = new FileReader();
+            fr.readAsDataURL(data.files[0]);
+            fr.onload = function () {
+                document.querySelector("#photo").src= fr.result;
+            }
+        }
+         else
+           document.querySelector("#photo").src= '/images/no-photo.png';
+    }
+
+    function removeImage(){
+        document.getElementById('image').value ='';
+        document.querySelector("#photo").src= '/images/no-photo.png';
+    }
+
+</script>
