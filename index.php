@@ -98,17 +98,19 @@
                             <div class="d-flex gap-3" >
                                 <div class="d-flex flex-column flex-fill w-25">
                                     <label id="image-label" for="image" class="form-label">
+                                        <input style="display: none" name="oldImage" id="oldImage"/>
+                                        <input style="display: none" name="id" id="id"/>
                                         <img class="img-thumbnail rounded w-100"  id="photo" src="/images/no-photo.png" alt="фото"  >
-                                        <button onclick="removeImage()" id="image-remove"  class='btn btn-link' type="button">
+                                        <button id="image-remove"  class='btn btn-link' type="button">
                                             <i class='bi bi-x-circle-fill' style='font-size: 1.1rem; '></i>
                                         </button>
                                     </label>
-                                    <input style="display: none" type="file" class="form-control" id="image" name="image" onchange="changeImage(this)"  accept="image/png, image/gif, image/jpeg" required>
+                                    <input style="display: none" type="file" class="form-control" id="image" name="image"   accept="image/png, image/gif, image/jpeg">
                                     <div class="invalid-feedback">
                                         Оберіть фото
                                     </div>
                                 </div>
-                                <div class="flex-fill">
+                                <div class="d-flex flex-column gap-3 flex-fill">
                                     <div >
                                         <label for="name" class="form-label">Ім'я та прізвище</label>
                                         <input type="text" class="form-control" id="name" name = "name" required>
@@ -136,8 +138,8 @@
                     </div>
                 </div>
                 <div class='modal-footer'>
-                    <button type='button' id="cancel-button" class='btn btn-secondary shaded-button' data-bs-dismiss='modal'>Відмінити</button>
-                    <button type="submit" form="user-form" id = 'edit-confirm-button' class='btn btn-primary shaded-button'>Зберегти</button>
+                    <button type='button' id="cancel-button" class='btn btn-secondary shaded-button'>Відмінити зміни</button>
+                    <button type="button" form="user-form" id = 'edit-confirm-button' class='btn btn-primary shaded-button'>Зберегти</button>
                 </div>
             </div>
         </div>
@@ -155,81 +157,125 @@
       let deleteUserId = 0;
       let editUserId = 0;
       let user = null;
-      function changeImage(data){
-         if (FileReader && data != null && data.files && data.files.length) {
-             const fr = new FileReader();
-             fr.readAsDataURL(data.files[0]);
-             fr.onload = function () {
-                 document.querySelector("#photo").src= fr.result;
-             }
-         }
-         else
-             document.querySelector("#photo").src= '/images/no-photo.png';
-     }
 
-     function removeImage(){
-         document.getElementById('image').value ='';
-         document.querySelector("#photo").src= '/images/no-photo.png';
-     }
-
-
-
+      function setFormValues(user){
+          document.querySelector("#id").value = user ? user.id:'';
+          document.querySelector("#name").value = user ? user.name:'';
+          document.querySelector("#email").value = user ? user.email:'';
+          document.querySelector("#phone").value = user ? user.phone:'';
+          document.querySelector("#photo").src= user ? ('images/'+user.image):'/images/no-photo.png';
+          document.querySelector("#oldImage").value= user ? user.image : '';
+          document.querySelector("#image").value = '';
+      }
 
       document.addEventListener('DOMContentLoaded',() => {
           function editCreateModalShow(event) {
               editUserId = event.target.getAttribute('data-edit-id');
+              const modalTitle = editModalElement.querySelector('.modal-title')
+              if(event.target.id === 'add-user-button'){
+                  user = null;
+                  modalTitle.textContent='Новий користувач';
+                  setFormValues();
+              }
+              else{
+                  modalTitle.textContent='Редагування інформації користувача';
+                  axios.post("/get_user.php", {id:editUserId}, { headers })
+                      .then(resp => {
+                          if(resp.status === 200){
+                              user = resp.data;
+                              setFormValues(user);
+                          }
+                      });
+              }
+              setImageValid(true);
+              userForm.classList.remove('was-validated')
               createEditModal.show();
           }
 
+          function imageValidator(){
+              const imageValid =  ((document.querySelector("#photo").src !== 'http://local.pv221.com/images/no-photo.png') || userImage.value );
+              setImageValid(imageValid);
+              return  imageValid;
+          }
 
-
-          const userForm = document.getElementById('user-form');
-          userForm.addEventListener('submit',(event)=>{
-              userForm.classList.add('was-validated')
-              if (!userForm.checkValidity()) {
-                  event.preventDefault()
-                  event.stopPropagation()
-
+          function setImageValid(isValid){
+              if(isValid){
+                  userImage.classList.remove("is-invalid")
+                  userImage.classList.add("is-valid")
+              }else{
+                  userImage.classList.remove("is-valid")
+                  userImage.classList.add("is-invalid")
               }
+          }
 
-          })
-
-
-          // const forms = document.querySelectorAll('.needs-validation')
-          // Array.from(forms).forEach(form => {
-          //     form.addEventListener('submit', event => {
-          //         if (!form.checkValidity()) {
-          //             event.preventDefault()
-          //             event.stopPropagation()
-          //         }
-          //         form.classList.add('was-validated')
-          //     }, false)
-          //
-          //
-          // })
-          // axios.post("/get_user.php", {id:77}, { headers })
-          //     .then(resp => {
-          //         if(resp.status == 200){
-          //             console.log(resp.data)
-          //         }
-          //
-          //
-          //     });
-          const deleteModalElement = document.getElementById('delete-confirmation');
-          const deleteModal = new bootstrap.Modal(deleteModalElement, {backdrop: false, keyboard: true, focus: true});
+          const confirmModalElement = document.getElementById('delete-confirmation');
+          const confirmModal = new bootstrap.Modal(confirmModalElement, {backdrop: false, keyboard: true, focus: true});
           const editModalElement = document.getElementById('create-edit-modal');
           const createEditModal = new bootstrap.Modal(editModalElement, {backdrop: false, keyboard: true, focus: true});
+
           const addUserButton = document.getElementById('add-user-button');
           addUserButton.addEventListener('click',editCreateModalShow);
+
           const editButtons = document.querySelectorAll('[data-edit-id]')
           editButtons.forEach((button)=>{
               button.addEventListener('click',editCreateModalShow);
           })
-          // const editCreteButton = document.getElementById('edit-confirm-button');
-          // editCreteButton.addEventListener('click',()=>{
-          //
-          // })
+
+          const deleteImageButton = document.getElementById('image-remove');
+          deleteImageButton.addEventListener('click',()=>{
+              document.getElementById('image').value ='';
+              document.querySelector("#photo").src= '/images/no-photo.png';
+          })
+
+          const userImage = document.getElementById('image');
+          userImage.addEventListener('change',(event)=>{
+               if (FileReader && event.target != null && event.target.files && event.target.files.length) {
+                  const fr = new FileReader();
+                  fr.readAsDataURL(event.target.files[0]);
+                  fr.onload = function () {
+                      document.querySelector("#photo").src= fr.result;
+                  }
+                  setImageValid(true);
+              }
+              else
+                  document.querySelector("#photo").src= '/images/no-photo.png';
+          })
+
+          const userForm = document.getElementById('user-form');
+          const editCreteButton = document.getElementById('edit-confirm-button');
+          editCreteButton.addEventListener('click',()=>{
+              userForm.classList.add('was-validated')
+              if (imageValidator() && userForm.checkValidity() ) {
+                  const formData = new FormData(userForm);
+                  if(user){
+                      // for (var pair of formData.entries()) {
+                      //     console.log(pair[0] + ": " + pair[1]);
+                      // }
+                      axios.post('/update.php',formData,{headers})
+                          .then(res=>{
+                              console.log(res)
+                              if(res.status===200){
+                                  window.location.reload();
+                              }
+                          })
+                   user = null;
+                  }else{
+                      axios.post('/create.php',formData,{headers})
+                          .then(res=>{
+                              if(res.status===200){
+                                  window.location.reload();
+                              }
+                          })
+                  }
+              }
+          });
+
           const cancelButton = document.getElementById('cancel-button');
+          cancelButton.addEventListener('click',()=>{
+              setFormValues(user);
+              console.log(user)
+              console.log(document.getElementById("name").value)
+          })
 
           const deleteConfirmButton = document.getElementById('delete-confirm-button');
           deleteConfirmButton.addEventListener('click',() => {
@@ -237,19 +283,16 @@
                   .then(resp => {
                        window.location.reload();
                   });
-
-             // modal.hide();
           });
+
           const deleteButtons = document.querySelectorAll('[data-delete-id]')
           deleteButtons.forEach((button)=>{
               button.addEventListener('click',(event)=>{
                   deleteUserId = event.target.getAttribute('data-delete-id');
-                  deleteModal.show();
+                  confirmModal.show();
               })
           })
       })
-
-
 
  </script>
 
