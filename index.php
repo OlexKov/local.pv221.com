@@ -144,16 +144,13 @@
             </div>
         </div>
     </div>
-
-
 </main>
-
 <script src="js/bootstrap.bundle.min.js"></script>
 <script src="js/axios.min.js"></script>
  <script>
-     const headers = {
+      const headers = {
          'Content-Type': 'multipart/form-data',
-     };
+      };
       let deleteUserId = 0;
       let editUserId = 0;
       let user = null;
@@ -248,9 +245,6 @@
               if (imageValidator() && userForm.checkValidity() ) {
                   const formData = new FormData(userForm);
                   if(user){
-                      // for (var pair of formData.entries()) {
-                      //     console.log(pair[0] + ": " + pair[1]);
-                      // }
                       axios.post('/update.php',formData,{headers})
                           .then(res=>{
                               console.log(res)
@@ -295,6 +289,5 @@
       })
 
  </script>
-
 </body>
 </html>

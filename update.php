@@ -3,10 +3,9 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
 {
     include_once $_SERVER["DOCUMENT_ROOT"]."/conection_database.php";
     $folderName = $_SERVER['DOCUMENT_ROOT'].'/'. UPLOADDIR;
-try {
 
     $oldImage = $_POST['oldImage'];
-
+try {
     if($_FILES["image"]["tmp_name"]!=''){
         $filePath = $folderName . "/" .$oldImage;
         if (file_exists($filePath)) {
@@ -22,14 +21,12 @@ try {
     $name = $_POST['name'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
-
     $sql = "UPDATE tbl_users SET name=:name, image=:image, email=:email, phone=:phone WHERE id = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['name' => $name, 'email' => $email, 'phone' => $phone, 'image' => $oldImage, 'id' => $id]);
 } catch (PDOException $e)  {
     echo "Error: " . $e->getMessage();
 }
-    //header('Location: /');
-    exit();
+   exit();
 }
 ?>
